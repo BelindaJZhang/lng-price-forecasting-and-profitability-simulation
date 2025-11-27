@@ -1,0 +1,3 @@
+The data is TXT files coming from microscope. Etc, etc. 
+
+TXT contains metadata, and ..... 
