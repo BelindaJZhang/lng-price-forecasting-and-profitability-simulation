@@ -1,145 +1,178 @@
-# LNG Price Forecasting & Trade Profitability Simulation  
-A data-driven tool to support smarter LNG trading decisions
+# LNG Price Forecasting & Trade Profitability Simulation
+*A data-driven tool to support smarter LNG trading decisions.*
 
-## **Author**
-[Juan Zhang](https://www.linkedin.com/in/juan-zhang-finance-professional/)
-
-## **Supervisors**  
-[Ekaterina Butyugina](https://www.linkedin.com/in/ekaterina-butyugina/),  
-[Albin Plathottathil](https://www.linkedin.com/in/albin-plathottathil/)
+## Author
+**Juan Zhang**  
+LinkedIn: https://www.linkedin.com/in/juan-zhang-finance-professional/
 
 ---
 
-## **Overview**
+## Overview
+This project combines deep-learning price forecasts with an interactive LNG trade profitability simulator.  
+It helps LNG analysts and traders explore price scenarios, compare route economics, and evaluate expected voyage margins.
 
-In the fast-moving world of global energy markets, agility and data-driven insight can make or break a trade.  
-LNG traders must evaluate volatile benchmark prices, shifting demand across European terminals, complex regasification cost structures, and multi-step voyage economics — often under time pressure.
+The application integrates:
 
-To address these challenges, I developed a **deep-learning forecasting engine** combined with a **Streamlit simulation tool** that helps traders:
+- Multi-horizon LNG benchmark price forecasts (TTF, PVB, Henry Hub, JKM)  
+- Voyage profitability calculations (netback, shipping assumptions, regas fees)  
+- Interactive visualisations and scenario testing  
 
-- Forecast LNG benchmark prices (TTF, PVB, Henry Hub, JKM)  
-- Simulate netback & profitability for each regasification terminal  
-- Adjust key cost drivers to explore sensitivity scenarios  
-- Visualize projected market conditions and route economics interactively
-
-This project was completed as part of the Constructor Academy Data Science & AI Bootcamp and later refined into a standalone portfolio project.
+Originally developed during the Constructor Academy Data Science & AI Bootcamp, this project has since been expanded into a standalone forecasting and simulation engine.
 
 ---
 
-## **The Problem**
+## The Problem
+LNG traders must quickly assess trade opportunities under significant uncertainty:
 
-Assessing LNG trade profitability is difficult because traders must integrate:
+- Volatile spot benchmarks  
+- Changing freight costs and regas fees  
+- Terminal-specific spreads  
+- Fuel loss and boil-off  
+- Geopolitical shocks  
 
-- Highly volatile benchmark prices  
-- Dynamic regasification and freight cost structures  
-- Point-in-time spreads between terminals  
-- Sudden geopolitical disruptions  
-- Manual spreadsheets and slow recalculation cycles  
-
-This leads to **time-consuming**, error-prone analysis and lost opportunities.
-
----
-
-## **The Solution**
-
-### **🔮 1. Deep Learning Forecasting Model**  
-A custom LSTM-based forecasting engine predicts LNG benchmark prices across:
-
-- **30-day**
-- **60-day**
-- **90-day**
-
-horizons for:
-
-- **TTF (EU)**  
-- **PVB (Spain)**  
-- **Henry Hub (US)**  
-- **JKM (Asia)**  
-
-Key features include:
-
-- Flexible **lookback window** tuning  
-- Feature-engineered inputs (returns, rolling std, z-scores, Bollinger width, etc.)  
-- Regime-based validation (pre- and post-war)  
-- Metrics: **MAE**, **R²**, and horizon comparisons  
-
-The model is optimized to remain stable under market shocks and shifting volatility regimes.
+Manual spreadsheets make this process slow, error-prone, and difficult to scenario-test.
 
 ---
 
-### **📈 2. Streamlit Application for Scenario Simulation**
+## The Solution
 
-The Streamlit app (see `app.py`) integrates forecasting outputs with a profitability simulator.
+### 1. Deep Learning Forecasting Engine (Conv1D + LSTM)
+The price forecasting module provides 30-, 60-, and 90-day horizon predictions for:
 
-Traders can:
+- TTF (EU)  
+- PVB (Spain)  
+- Henry Hub (US)  
+- JKM (Asia)  
 
-- **Simulate netback & net profit** for each destination terminal  
-- Adjust key inputs (benchmark price, regas fees, freight, fuel loss, cargo costs)  
-- Compare terminals via interactive bar charts  
-- Visualize route economics with a **waterfall profit breakdown**  
-- Explore actual vs. predicted price curves across horizons  
+Features and methodology:
 
-This transforms complex trade evaluation into a quick, intuitive workflow.
+- Rolling feature engineering (returns, Bollinger width, z-scores, etc.)  
+- Horizon-aware windowing  
+- Conv1D → LSTM stacked architecture  
+- Metrics: MAE, RMSE, R²  
+- Validation split based on historical cutoff date  
 
----
-
-## **Illustrations**
-
-### **LNG Trading Flow & Profitability Concept**
-<p align="center">
-  <img src="images/trade_flow.png" width="650"/>
-</p>
-
-### **LNG Forecast Model Output Across Multiple Horizons**
-<p align="center">
-  <img src="images/forecast_panels.png" width="900"/>
-</p>
+Forecasts are precomputed offline and loaded by the Streamlit app for fast rendering.
 
 ---
 
-## **Data**
+### 2. Voyage Profitability Simulation (Netback Analysis)
+The simulation module calculates:
 
-The `data/` directory contains datasets used in this project, including:
+- Netback at origin  
+- Delivered price at destination  
+- Voyage profitability  
+- Impact of regas fees, spreads, freight costs, and fuel loss  
 
-- Historical LNG benchmark prices  
-- Freight & regasification cost components  
-- Weather and temperature indicators  
-- Technical time-series features  
+Users can adjust:
 
-Raw data originates from publicly available sources and internal market reports.
+- Regas fee  
+- Shipping cost  
+- Margin assumptions  
+- Fuel loss / boil-off  
+- Benchmark spreads  
+
+Outputs include:
+
+- Profitability tables  
+- Waterfall charts  
+- Route comparison visuals  
 
 ---
 
-## **Models**
+## Illustrations
 
-The `models/` directory includes trained LSTM models for each horizon and index.
+### LNG Trading Flow
+![LNG_flow](images/trade_flow.png)
+
+### Forecast Panels (30/60/90 days)
+![Forecast_panels](images/forecast_panels.png)
 
 ---
 
-## **Notebooks**
+## Repository Structure
+```
+.
+├── app.py                         # Main Streamlit application
+├── Forecast_Plotting_Functions.py # Forecast visualisation helpers
+├── requirements.txt
+├── Dockerfile                     # Deployment config (HuggingFace)
+│
+├── data/
+│   └── processed/                 # Netback & route datasets
+│
+├── reports/                       # Precomputed forecast CSVs
+├── images/                        # Illustrations
+│
+├── notebooks/                     # Model development notebooks
+├── models/                        # Saved LSTM models (optional)
+└── README.md
+```
 
-The `notebooks/` folder documents the full pipeline:
+---
 
-- Data preprocessing  
-- Exploratory analysis  
+## Data
+Stored under `data/` and includes:
+
+- Historical LNG price benchmarks  
+- Technical indicators  
+- Route-specific cost assumptions  
+- Weather data where applicable  
+
+Raw data comes from public sources and internal market reports.
+
+---
+
+## Model Development
+The workflow in `notebooks/` includes:
+
+- Data cleaning and exploration  
 - Feature engineering  
-- Model training & hyperparameter tuning  
-- Validation and horizon comparison  
+- Model training (Conv1D + LSTM)  
+- Hyperparameter tuning  
+- Model validation  
+- Horizon comparison  
+- Forecast export to CSV  
 
 ---
 
-## **Streamlit Application**
-
-The interactive user interface is implemented in:
-
-- `app.py`
-
-It consists of two main tabs:
-
-1. **Destination Netback & Profit Simulation**  
-2. **Forecast Prices Panel**
-
-Run the app locally with:
-
-```bash
+## Running Locally
+```
+pip install -r requirements.txt
 streamlit run app.py
+```
+
+---
+
+## Deployment (HuggingFace Spaces – Docker)
+
+This project uses a custom Docker image to ensure compatible versions of:
+
+- Python 3.10  
+- pandas 2.2  
+- numpy 1.26  
+- scikit-learn 1.3  
+- Streamlit 1.32  
+
+**Dockerfile:**
+```
+FROM python:3.10-slim
+RUN apt-get update && apt-get install -y build-essential gcc g++ libffi-dev libssl-dev
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["streamlit", "run", "app.py", "--server.port=7860", "--server.address=0.0.0.0"]
+```
+
+---
+
+## Live Demo
+HuggingFace App: https://huggingface.co/spaces/JUANGE1014/lng_trade_profitability_simulation?logs=container
+GitHub Repo: https://github.com/BelindaJZhang/lng-price-forecasting-and-profitability-simulation
+
+---
+
+## About the Author
+I’m **Juan Zhang**, a finance professional and and trained data scientist passionate about AI-driven forecasting, and process optimisation.  
+LinkedIn: https://www.linkedin.com/in/juan-zhang-finance-professional/
